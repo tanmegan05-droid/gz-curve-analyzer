@@ -5,11 +5,106 @@ from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 
 # Page configuration
-st.set_page_config(page_title="GZ Curve Analyzer - MV Del Monte", layout="wide")
+st.set_page_config(
+    page_title="GZ Curve Analyzer - MV Del Monte", 
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'About': "GZ Curve Analyzer for vessel stability analysis"
+    }
+)
 
-# Title and description
-st.title("GZ Curve Analyzer for MV Del Monte")
-st.markdown("**Statical Stability Curve Analysis Tool**")
+# Custom CSS for better aesthetics
+st.markdown("""
+<style>
+    /* Main title styling */
+    .main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1e3a8a;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    /* Subtitle styling */
+    .subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        text-align: center;
+        margin-bottom: 2rem;
+        font-weight: 500;
+    }
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    
+    /* Input labels in sidebar */
+    [data-testid="stSidebar"] label {
+        font-weight: 600;
+        color: #334155;
+    }
+    
+    /* Metric card styling */
+    [data-testid="stMetricValue"] {
+        font-size: 2rem;
+        color: #1e3a8a;
+        font-weight: 700;
+    }
+    
+    /* Headers */
+    h2 {
+        color: #1e40af;
+        font-weight: 600;
+        border-bottom: 3px solid #3b82f6;
+        padding-bottom: 0.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    h3 {
+        color: #475569;
+        font-weight: 600;
+    }
+    
+    /* Info box styling */
+    .stAlert {
+        background-color: #dbeafe;
+        border-left: 4px solid #3b82f6;
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background-color: #f1f5f9;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    /* Button styling */
+    .stButton>button {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 0.5rem 2rem;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+    }
+    
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        box-shadow: 0 6px 8px rgba(59, 130, 246, 0.4);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Title and description with custom styling
+st.markdown('<h1 class="main-title">⚓ GZ Curve Analyzer for MV Del Monte</h1>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">🌊 Statical Stability Curve Analysis Tool</p>', unsafe_allow_html=True)
 st.markdown("---")
 
 # Hydrostatic data: Draft vs Displacement
@@ -79,11 +174,12 @@ def calculate_gz_curve(kn_values, kg, heel_angles):
 
 
 # Sidebar for inputs
-st.sidebar.header("Vessel Data Input")
+st.sidebar.markdown("## 📋 Vessel Data Input")
+st.sidebar.markdown("")
 
 # Draft input with number field
 draft = st.sidebar.number_input(
-    "Mean Draft (m)",
+    "⚓ Mean Draft (m)",
     min_value=2.0,
     max_value=14.0,
     value=8.0,
@@ -93,7 +189,7 @@ draft = st.sidebar.number_input(
 
 # KG input with number field
 kg = st.sidebar.number_input(
-    "KG - Vertical Center of Gravity (m)",
+    "📏 KG - Vertical Center of Gravity (m)",
     min_value=5.0,
     max_value=15.0,
     value=8.5,
@@ -102,10 +198,14 @@ kg = st.sidebar.number_input(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### About")
+st.sidebar.markdown("### 💡 About This Tool")
 st.sidebar.info(
     "This tool calculates and visualizes the GZ curve (righting arm curve) "
-    "for MV Del Monte based on the input draft and KG values."
+    "for MV Del Monte based on the input draft and KG values.\n\n"
+    "**Features:**\n"
+    "- Real-time GZ curve calculation\n"
+    "- Interactive visualizations\n"
+    "- Comprehensive stability analysis"
 )
 
 # Main content area
@@ -138,58 +238,118 @@ if displacement is not None:
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.header("GZ Curve Visualization")
+    st.markdown("## 📈 GZ Curve Visualization")
     
     if displacement is not None:
-        # Create the plot
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(HEEL_ANGLES, gz_values, 'b-', linewidth=2, marker='o', markersize=4)
-        ax.axhline(y=0, color='r', linestyle='--', linewidth=1, alpha=0.7)
-        ax.grid(True, alpha=0.3)
-        ax.set_xlabel('Heel Angle (degrees)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('GZ - Righting Arm (m)', fontsize=12, fontweight='bold')
-        ax.set_title('Statical Stability Curve (GZ Curve)', fontsize=14, fontweight='bold')
+        # Create the plot with improved styling
+        fig, ax = plt.subplots(figsize=(10, 6), facecolor='white')
+        
+        # Set style
+        ax.set_facecolor('#f8fafc')
+        
+        # Plot the GZ curve with gradient color
+        ax.plot(HEEL_ANGLES, gz_values, 
+                color='#3b82f6', linewidth=3, 
+                marker='o', markersize=6, 
+                markerfacecolor='#60a5fa', 
+                markeredgecolor='#1e40af',
+                markeredgewidth=1.5,
+                label='GZ Curve',
+                alpha=0.9)
+        
+        # Zero line
+        ax.axhline(y=0, color='#ef4444', linestyle='--', linewidth=2, alpha=0.7, label='Zero Line')
+        
+        # Grid styling
+        ax.grid(True, alpha=0.3, linestyle='--', linewidth=0.8, color='#94a3b8')
+        
+        # Labels with better styling
+        ax.set_xlabel('Heel Angle (degrees)', fontsize=13, fontweight='600', color='#1e293b')
+        ax.set_ylabel('GZ - Righting Arm (m)', fontsize=13, fontweight='600', color='#1e293b')
+        ax.set_title('Statical Stability Curve (GZ Curve)', 
+                     fontsize=15, fontweight='700', color='#1e3a8a', pad=15)
         ax.set_xlim(0, 90)
         
-        # Add annotation for max GZ
-        ax.annotate(f'Max GZ: {max_gz:.3f}m\nat {max_angle}°', 
-                    xy=(max_angle, max_gz), 
-                    xytext=(max_angle + 10, max_gz),
-                    arrowprops=dict(arrowstyle='->', color='red', lw=1.5),
-                    fontsize=10, color='red', fontweight='bold',
-                    bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', alpha=0.7))
+        # Add legend
+        ax.legend(loc='best', frameon=True, shadow=True, fancybox=True)
         
+        # Add annotation for max GZ with improved styling
+        ax.annotate(f'🎯 Max GZ: {max_gz:.3f}m\nat {max_angle}°', 
+                    xy=(max_angle, max_gz), 
+                    xytext=(max_angle + 15, max_gz + 0.3),
+                    arrowprops=dict(arrowstyle='->', color='#dc2626', lw=2, 
+                                  connectionstyle='arc3,rad=0.3'),
+                    fontsize=11, color='#1e3a8a', fontweight='bold',
+                    bbox=dict(boxstyle='round,pad=0.7', 
+                             facecolor='#fef3c7', 
+                             edgecolor='#f59e0b',
+                             linewidth=2,
+                             alpha=0.95))
+        
+        # Improve tick styling
+        ax.tick_params(colors='#475569', labelsize=10)
+        
+        # Add border
+        for spine in ax.spines.values():
+            spine.set_edgecolor('#cbd5e1')
+            spine.set_linewidth(1.5)
+        
+        plt.tight_layout()
         st.pyplot(fig)
 
 with col2:
-    st.header("Calculated Values")
+    st.markdown("## 📊 Calculated Values")
     
     if displacement is not None:
-        # Display displacement prominently
-        st.metric(
-            label="Displacement",
-            value=f"{displacement:.1f} tonnes",
-            help="Interpolated from hydrostatic data"
-        )
+        # Display displacement prominently with custom styling
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); 
+                    padding: 1.5rem; border-radius: 12px; 
+                    border-left: 5px solid #3b82f6; margin-bottom: 1rem;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <p style='color: #64748b; font-size: 0.9rem; margin: 0; font-weight: 600;'>🚢 Displacement</p>
+            <p style='color: #1e3a8a; font-size: 2rem; margin: 0.3rem 0 0 0; font-weight: 700;'>{:.1f} <span style='font-size: 1.2rem;'>tonnes</span></p>
+        </div>
+        """.format(displacement), unsafe_allow_html=True)
         
-        st.metric(
-            label="Draft",
-            value=f"{draft:.1f} m"
-        )
+        # Other metrics in a cleaner style
+        col2_1, col2_2 = st.columns(2)
         
-        st.metric(
-            label="KG",
-            value=f"{kg:.1f} m"
-        )
+        with col2_1:
+            st.markdown("""
+            <div style='background: #f1f5f9; padding: 1rem; border-radius: 8px; 
+                        text-align: center; border: 2px solid #cbd5e1;'>
+                <p style='color: #64748b; font-size: 0.85rem; margin: 0; font-weight: 600;'>⚓ Draft</p>
+                <p style='color: #1e3a8a; font-size: 1.5rem; margin: 0.2rem 0 0 0; font-weight: 700;'>{:.1f} m</p>
+            </div>
+            """.format(draft), unsafe_allow_html=True)
+            
+        with col2_2:
+            st.markdown("""
+            <div style='background: #f1f5f9; padding: 1rem; border-radius: 8px; 
+                        text-align: center; border: 2px solid #cbd5e1;'>
+                <p style='color: #64748b; font-size: 0.85rem; margin: 0; font-weight: 600;'>📏 KG</p>
+                <p style='color: #1e3a8a; font-size: 1.5rem; margin: 0.2rem 0 0 0; font-weight: 700;'>{:.1f} m</p>
+            </div>
+            """.format(kg), unsafe_allow_html=True)
         
-        st.metric(
-            label="Max GZ",
-            value=f"{max_gz:.3f} m",
-            delta=f"at {max_angle}°"
-        )
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Max GZ with special highlight
+        max_gz_color = '#10b981' if max_gz > 0 else '#ef4444'
+        st.markdown("""
+        <div style='background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); 
+                    padding: 1.5rem; border-radius: 12px; 
+                    border-left: 5px solid #f59e0b;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <p style='color: #78716c; font-size: 0.9rem; margin: 0; font-weight: 600;'>🎯 Maximum GZ</p>
+            <p style='color: {}; font-size: 1.8rem; margin: 0.3rem 0 0 0; font-weight: 700;'>{:.3f} m</p>
+            <p style='color: #57534e; font-size: 0.9rem; margin: 0.3rem 0 0 0;'>at {} degrees</p>
+        </div>
+        """.format(max_gz_color, max_gz, max_angle), unsafe_allow_html=True)
 
 # Data points display
-st.header("GZ Curve Data Points")
+st.markdown("## 📑 GZ Curve Data Points")
 
 if displacement is not None:
     # Create DataFrame for display
@@ -204,50 +364,74 @@ if displacement is not None:
         data_df.style.format({
             'KN (m)': '{:.3f}',
             'GZ (m)': '{:.3f}'
-        }),
+        }).set_properties(**{
+            'background-color': '#f8fafc',
+            'color': '#1e293b',
+            'border-color': '#cbd5e1'
+        }).set_table_styles([
+            {'selector': 'th', 'props': [
+                ('background-color', '#3b82f6'),
+                ('color', 'white'),
+                ('font-weight', '600'),
+                ('text-align', 'center'),
+                ('padding', '12px')
+            ]},
+            {'selector': 'td', 'props': [
+                ('text-align', 'center'),
+                ('padding', '10px')
+            ]}
+        ]),
         use_container_width=True,
         height=400
     )
 
-# Additional information
-with st.expander("📊 Hydrostatic Data Reference"):
-    hydro_df = pd.DataFrame(HYDROSTATIC_DATA)
-    hydro_df.columns = ['Draft (m)', 'Displacement (tonnes)']
-    st.dataframe(hydro_df, use_container_width=True)
+# Additional information with improved styling
+st.markdown("<br>", unsafe_allow_html=True)
 
-with st.expander("ℹ️ About GZ Curve"):
-    st.markdown("""
-    ### What is a GZ Curve?
-    
-    The **GZ curve** (also known as the righting arm curve) is a fundamental tool in naval architecture 
-    that represents a ship's stability characteristics. It shows the relationship between the heel angle 
-    and the righting arm (GZ).
-    
-    ### Calculation Method
-    
-    The GZ value is calculated using the formula:
-    
-    **GZ = KN - KG × sin(θ)**
-    
-    Where:
-    - **GZ** = Righting arm (meters)
-    - **KN** = Cross-curve of stability value (meters)
-    - **KG** = Vertical center of gravity (meters)
-    - **θ** = Heel angle (degrees)
-    
-    ### Interpretation
-    
-    - **Positive GZ**: Ship has a righting moment that will tend to return it to upright
-    - **Negative GZ**: Ship has a capsizing moment
-    - **Maximum GZ**: Indicates the angle at which the ship has maximum stability
-    - **Range of Stability**: The range of angles where GZ is positive
-    """)
+col_exp1, col_exp2 = st.columns(2)
 
-# Footer
+with col_exp1:
+    with st.expander("📊 Hydrostatic Data Reference", expanded=False):
+        hydro_df = pd.DataFrame(HYDROSTATIC_DATA)
+        hydro_df.columns = ['Draft (m)', 'Displacement (tonnes)']
+        st.dataframe(hydro_df, use_container_width=True)
+
+with col_exp2:
+    with st.expander("ℹ️ About GZ Curve", expanded=False):
+        st.markdown("""
+        ### What is a GZ Curve?
+        
+        The **GZ curve** (righting arm curve) is fundamental in naval architecture, 
+        showing the relationship between heel angle and righting arm (GZ).
+        
+        ### Calculation Formula
+        
+        ```
+        GZ = KN - KG × sin(θ)
+        ```
+        
+        **Where:**
+        - **GZ** = Righting arm (meters)
+        - **KN** = Cross-curve of stability (meters)
+        - **KG** = Vertical center of gravity (meters)
+        - **θ** = Heel angle (degrees)
+        
+        ### Interpretation
+        
+        - ✅ **Positive GZ**: Righting moment returns ship upright
+        - ⚠️ **Negative GZ**: Capsizing moment
+        - 🎯 **Maximum GZ**: Angle of maximum stability
+        """)
+
+# Footer with improved styling
 st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: gray;'>"
-    "GZ Curve Analyzer for MV Del Monte | Vessel Stability Analysis Tool"
-    "</div>",
-    unsafe_allow_html=True
-)
+st.markdown("""
+<div style='text-align: center; padding: 2rem 0 1rem 0;'>
+    <p style='color: #94a3b8; font-size: 0.95rem; margin: 0;'>
+        <strong style='color: #475569;'>⚓ GZ Curve Analyzer for MV Del Monte</strong>
+    </p>
+    <p style='color: #cbd5e1; font-size: 0.85rem; margin: 0.5rem 0 0 0;'>
+        🌊 Vessel Stability Analysis Tool | Built with Streamlit
+    </p>
+</div>
+""", unsafe_allow_html=True)
