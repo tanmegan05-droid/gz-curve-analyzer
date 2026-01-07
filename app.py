@@ -64,7 +64,9 @@ def interpolate_kn_values(displacement):
         # Get KN values for this angle across all displacements
         kn_at_angle = KN_DATA[:, angle_idx]
         # Interpolate for the given displacement
-        f = interp1d(DISPLACEMENTS, kn_at_angle, kind='linear', fill_value='extrapolate')
+        # Use bounds_error=False and fill_value with boundary clamping
+        f = interp1d(DISPLACEMENTS, kn_at_angle, kind='linear', bounds_error=False, 
+                     fill_value=(kn_at_angle[0], kn_at_angle[-1]))
         kn_values.append(float(f(displacement)))
     return np.array(kn_values)
 
@@ -107,22 +109,34 @@ st.sidebar.info(
 )
 
 # Main content area
+# Calculate displacement first (before columns)
+displacement = interpolate_displacement(draft)
+
+# Initialize variables
+kn_values = None
+gz_values = None
+max_gz = 0
+max_angle = 0
+
+# Only proceed if displacement is valid
+if displacement is not None:
+    # Interpolate KN values for the calculated displacement
+    kn_values = interpolate_kn_values(displacement)
+    
+    # Calculate GZ curve
+    gz_values = calculate_gz_curve(kn_values, kg, HEEL_ANGLES)
+    
+    # Calculate max GZ
+    max_gz_idx = np.argmax(gz_values)
+    max_gz = gz_values[max_gz_idx]
+    max_angle = HEEL_ANGLES[max_gz_idx]
+
 col1, col2 = st.columns([2, 1])
 
 with col1:
     st.header("GZ Curve Visualization")
     
-    # Calculate displacement
-    displacement = interpolate_displacement(draft)
-    
-    # Only proceed if displacement is valid
     if displacement is not None:
-        # Interpolate KN values for the calculated displacement
-        kn_values = interpolate_kn_values(displacement)
-        
-        # Calculate GZ curve
-        gz_values = calculate_gz_curve(kn_values, kg, HEEL_ANGLES)
-        
         # Create the plot
         fig, ax = plt.subplots(figsize=(10, 6))
         ax.plot(HEEL_ANGLES, gz_values, 'b-', linewidth=2, marker='o', markersize=4)
@@ -134,9 +148,6 @@ with col1:
         ax.set_xlim(0, 90)
         
         # Add annotation for max GZ
-        max_gz_idx = np.argmax(gz_values)
-        max_gz = gz_values[max_gz_idx]
-        max_angle = HEEL_ANGLES[max_gz_idx]
         ax.annotate(f'Max GZ: {max_gz:.3f}m\nat {max_angle}°', 
                     xy=(max_angle, max_gz), 
                     xytext=(max_angle + 10, max_gz),
