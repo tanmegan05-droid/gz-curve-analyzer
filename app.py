@@ -126,10 +126,14 @@ if displacement is not None:
     # Calculate GZ curve
     gz_values = calculate_gz_curve(kn_values, kg, HEEL_ANGLES)
     
-    # Calculate max GZ
+    # Calculate max GZ (or least negative if all values are negative)
     max_gz_idx = np.argmax(gz_values)
     max_gz = gz_values[max_gz_idx]
     max_angle = HEEL_ANGLES[max_gz_idx]
+    
+    # Warn if max GZ is negative (indicates poor stability)
+    if max_gz < 0:
+        st.warning(f"⚠️ All GZ values are negative. The vessel has negative stability at this KG ({kg}m). Consider reducing the KG value.")
 
 col1, col2 = st.columns([2, 1])
 
@@ -195,11 +199,15 @@ if displacement is not None:
         'GZ (m)': gz_values
     })
     
-    # Format the DataFrame for better display
-    data_df['KN (m)'] = data_df['KN (m)'].map('{:.3f}'.format)
-    data_df['GZ (m)'] = data_df['GZ (m)'].map('{:.3f}'.format)
-    
-    st.dataframe(data_df, use_container_width=True, height=400)
+    # Display with formatting (using styling for proper numerical preservation)
+    st.dataframe(
+        data_df.style.format({
+            'KN (m)': '{:.3f}',
+            'GZ (m)': '{:.3f}'
+        }),
+        use_container_width=True,
+        height=400
+    )
 
 # Additional information
 with st.expander("📊 Hydrostatic Data Reference"):
