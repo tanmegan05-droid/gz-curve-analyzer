@@ -43,13 +43,22 @@ KN_DATA = np.array([
 
 def interpolate_displacement(draft):
     """Interpolate displacement for a given draft."""
+    # The slider ensures draft is within bounds, but we add a check for safety
+    if draft < min(HYDROSTATIC_DATA['draft']) or draft > max(HYDROSTATIC_DATA['draft']):
+        st.error(f"Draft must be between {min(HYDROSTATIC_DATA['draft'])}m and {max(HYDROSTATIC_DATA['draft'])}m")
+        return None
+    
     f = interp1d(HYDROSTATIC_DATA['draft'], HYDROSTATIC_DATA['displacement'], 
-                 kind='linear', fill_value='extrapolate')
+                 kind='linear')
     return float(f(draft))
 
 
 def interpolate_kn_values(displacement):
     """Interpolate KN values for a given displacement across all heel angles."""
+    # Check if displacement is within safe bounds
+    if displacement < min(DISPLACEMENTS) or displacement > max(DISPLACEMENTS):
+        st.warning(f"Displacement {displacement:.1f} tonnes is outside the KN data range ({min(DISPLACEMENTS)}-{max(DISPLACEMENTS)} tonnes). Results may be less accurate.")
+    
     kn_values = []
     for angle_idx in range(len(HEEL_ANGLES)):
         # Get KN values for this angle across all displacements
@@ -106,76 +115,80 @@ with col1:
     # Calculate displacement
     displacement = interpolate_displacement(draft)
     
-    # Interpolate KN values for the calculated displacement
-    kn_values = interpolate_kn_values(displacement)
-    
-    # Calculate GZ curve
-    gz_values = calculate_gz_curve(kn_values, kg, HEEL_ANGLES)
-    
-    # Create the plot
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(HEEL_ANGLES, gz_values, 'b-', linewidth=2, marker='o', markersize=4)
-    ax.axhline(y=0, color='r', linestyle='--', linewidth=1, alpha=0.7)
-    ax.grid(True, alpha=0.3)
-    ax.set_xlabel('Heel Angle (degrees)', fontsize=12, fontweight='bold')
-    ax.set_ylabel('GZ - Righting Arm (m)', fontsize=12, fontweight='bold')
-    ax.set_title('Statical Stability Curve (GZ Curve)', fontsize=14, fontweight='bold')
-    ax.set_xlim(0, 90)
-    
-    # Add annotation for max GZ
-    max_gz_idx = np.argmax(gz_values)
-    max_gz = gz_values[max_gz_idx]
-    max_angle = HEEL_ANGLES[max_gz_idx]
-    ax.annotate(f'Max GZ: {max_gz:.3f}m\nat {max_angle}°', 
-                xy=(max_angle, max_gz), 
-                xytext=(max_angle + 10, max_gz),
-                arrowprops=dict(arrowstyle='->', color='red', lw=1.5),
-                fontsize=10, color='red', fontweight='bold',
-                bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', alpha=0.7))
-    
-    st.pyplot(fig)
+    # Only proceed if displacement is valid
+    if displacement is not None:
+        # Interpolate KN values for the calculated displacement
+        kn_values = interpolate_kn_values(displacement)
+        
+        # Calculate GZ curve
+        gz_values = calculate_gz_curve(kn_values, kg, HEEL_ANGLES)
+        
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.plot(HEEL_ANGLES, gz_values, 'b-', linewidth=2, marker='o', markersize=4)
+        ax.axhline(y=0, color='r', linestyle='--', linewidth=1, alpha=0.7)
+        ax.grid(True, alpha=0.3)
+        ax.set_xlabel('Heel Angle (degrees)', fontsize=12, fontweight='bold')
+        ax.set_ylabel('GZ - Righting Arm (m)', fontsize=12, fontweight='bold')
+        ax.set_title('Statical Stability Curve (GZ Curve)', fontsize=14, fontweight='bold')
+        ax.set_xlim(0, 90)
+        
+        # Add annotation for max GZ
+        max_gz_idx = np.argmax(gz_values)
+        max_gz = gz_values[max_gz_idx]
+        max_angle = HEEL_ANGLES[max_gz_idx]
+        ax.annotate(f'Max GZ: {max_gz:.3f}m\nat {max_angle}°', 
+                    xy=(max_angle, max_gz), 
+                    xytext=(max_angle + 10, max_gz),
+                    arrowprops=dict(arrowstyle='->', color='red', lw=1.5),
+                    fontsize=10, color='red', fontweight='bold',
+                    bbox=dict(boxstyle='round,pad=0.5', facecolor='yellow', alpha=0.7))
+        
+        st.pyplot(fig)
 
 with col2:
     st.header("Calculated Values")
     
-    # Display displacement prominently
-    st.metric(
-        label="Displacement",
-        value=f"{displacement:.1f} tonnes",
-        help="Interpolated from hydrostatic data"
-    )
-    
-    st.metric(
-        label="Draft",
-        value=f"{draft:.1f} m"
-    )
-    
-    st.metric(
-        label="KG",
-        value=f"{kg:.1f} m"
-    )
-    
-    st.metric(
-        label="Max GZ",
-        value=f"{max_gz:.3f} m",
-        delta=f"at {max_angle}°"
-    )
+    if displacement is not None:
+        # Display displacement prominently
+        st.metric(
+            label="Displacement",
+            value=f"{displacement:.1f} tonnes",
+            help="Interpolated from hydrostatic data"
+        )
+        
+        st.metric(
+            label="Draft",
+            value=f"{draft:.1f} m"
+        )
+        
+        st.metric(
+            label="KG",
+            value=f"{kg:.1f} m"
+        )
+        
+        st.metric(
+            label="Max GZ",
+            value=f"{max_gz:.3f} m",
+            delta=f"at {max_angle}°"
+        )
 
 # Data points display
 st.header("GZ Curve Data Points")
 
-# Create DataFrame for display
-data_df = pd.DataFrame({
-    'Heel Angle (°)': HEEL_ANGLES,
-    'KN (m)': kn_values,
-    'GZ (m)': gz_values
-})
-
-# Format the DataFrame for better display
-data_df['KN (m)'] = data_df['KN (m)'].map('{:.3f}'.format)
-data_df['GZ (m)'] = data_df['GZ (m)'].map('{:.3f}'.format)
-
-st.dataframe(data_df, use_container_width=True, height=400)
+if displacement is not None:
+    # Create DataFrame for display
+    data_df = pd.DataFrame({
+        'Heel Angle (°)': HEEL_ANGLES,
+        'KN (m)': kn_values,
+        'GZ (m)': gz_values
+    })
+    
+    # Format the DataFrame for better display
+    data_df['KN (m)'] = data_df['KN (m)'].map('{:.3f}'.format)
+    data_df['GZ (m)'] = data_df['GZ (m)'].map('{:.3f}'.format)
+    
+    st.dataframe(data_df, use_container_width=True, height=400)
 
 # Additional information
 with st.expander("📊 Hydrostatic Data Reference"):
