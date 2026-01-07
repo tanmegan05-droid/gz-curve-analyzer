@@ -81,14 +81,14 @@ def calculate_gz_curve(kn_values, kg, heel_angles):
 # Sidebar for inputs
 st.sidebar.header("Vessel Data Input")
 
-# Draft input with slider
-draft = st.sidebar.slider(
+# Draft input with number field
+draft = st.sidebar.number_input(
     "Mean Draft (m)",
     min_value=2.0,
     max_value=14.0,
     value=8.0,
     step=0.1,
-    help="Select the mean draft of the vessel"
+    help="Enter the mean draft of the vessel"
 )
 
 # KG input with number field
