@@ -111,7 +111,7 @@ st.markdown("---")
 # Draft in meters, Displacement in tonnes
 HYDROSTATIC_DATA = {
     'draft': [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0],
-    'displacement': [1500, 2800, 4200, 5800, 7500, 9400, 11400, 13500, 15700, 18000, 20400, 22900, 25500]
+    'displacement': [10497, 12250, 14100, 16050, 18100, 20250, 22500, 24850, 27300, 29850, 32500, 35250, 38100]
 }
 
 # KN curve data: KN values at various displacements and heel angles
